@@ -9,6 +9,7 @@ public class Event {
     @SerializedName("id")
     @Expose
     public int id;
+
     @SerializedName("uuid")
     @Expose
     public String uuid;
@@ -16,13 +17,20 @@ public class Event {
     @SerializedName("active")
     @Expose
     public boolean active;
+
     @SerializedName("created_at")
     @Expose
     public LocalDateTime createdAt;
-    @SerializedName("until")
-    @Expose
-    public LocalDateTime until;
+
     @SerializedName("deadline")
     @Expose
     public LocalDateTime deadline;
+
+    @SerializedName("until")
+    @Expose
+    public LocalDateTime until;
+
+    @SerializedName("max_order_price")
+    @Expose
+    public LocalDateTime maxOrderPrice;
 }

@@ -47,7 +47,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private LoginViewModel loginViewModel;
     private ActivityLoginBinding binding;
-    public ExecutorService executorService = Executors.newFixedThreadPool(4);
+    public ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

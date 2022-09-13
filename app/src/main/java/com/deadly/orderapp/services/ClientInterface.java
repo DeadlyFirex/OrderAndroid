@@ -3,12 +3,16 @@ package com.deadly.orderapp.services;
 import com.deadly.orderapp.models.response.*;
 import com.deadly.orderapp.models.response.auth.AuthenticationResponse;
 import com.deadly.orderapp.models.response.auth.VerifyResponse;
+import com.deadly.orderapp.models.response.event.EventListResponse;
+import com.deadly.orderapp.models.response.event.EventResponse;
 import com.deadly.orderapp.models.response.generic.ChangedResponse;
 import com.deadly.orderapp.models.response.generic.VersionResponse;
 import com.deadly.orderapp.models.response.order.OrderListResponse;
 import com.deadly.orderapp.models.response.order.OrderResponse;
 import com.deadly.orderapp.models.response.product.ProductListResponse;
 import com.deadly.orderapp.models.response.product.ProductResponse;
+import com.deadly.orderapp.models.response.user.UserListResponse;
+import com.deadly.orderapp.models.response.user.UserResponse;
 
 import java.util.HashMap;
 
@@ -50,10 +54,10 @@ public interface ClientInterface {
     // Users
 
     @GET("/user/all")
-    Call<ResponseBody> getAllUsers();
+    Call<UserListResponse> getAllUsers();
 
     @GET("/user/{uuid}")
-    Call<ResponseBody> getUserByUuid(@Path("uuid") String uuid);
+    Call<UserResponse> getUserByUuid(@Path("uuid") String uuid);
 
     @Deprecated
     @GET("/user/last_changed")
@@ -65,7 +69,7 @@ public interface ClientInterface {
     Call<ProductListResponse> getAllProducts();
 
     @GET("/product/{uuid}")
-    Call<ProductResponse> getProduct(@Path("uuid") String uuid);
+    Call<ProductResponse> getProductByUuid(@Path("uuid") String uuid);
 
     @Deprecated
     @GET("/product/last_changed")
@@ -101,16 +105,16 @@ public interface ClientInterface {
     // Events
 
     @GET("/event/current")
-    Call<ResponseBody> getCurrentEvent();
+    Call<EventResponse> getCurrentEvent();
 
     @GET("/event/all")
-    Call<ResponseBody> getAllEvents();
+    Call<EventListResponse> getAllEvents();
 
     @GET("/event/{uuid}")
-    Call<ResponseBody> getEventByUuid(@Path("uuid") String uuid);
+    Call<EventResponse> getEventByUuid(@Path("uuid") String uuid);
 
     @Deprecated
     @GET("/event/last_changed")
-    Call<ResponseBody> getEventsLastChanged();
+    Call<?> getEventsLastChanged();
 
 }

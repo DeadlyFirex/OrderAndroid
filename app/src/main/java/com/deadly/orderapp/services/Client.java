@@ -1,11 +1,21 @@
 package com.deadly.orderapp.services;
 
+import android.util.NoSuchPropertyException;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.deadly.orderapp.models.response.BaseResponse;
 import com.deadly.orderapp.models.response.auth.AuthenticationResponse;
 import com.deadly.orderapp.models.response.auth.VerifyResponse;
+import com.deadly.orderapp.models.response.event.EventListResponse;
+import com.deadly.orderapp.models.response.event.EventResponse;
+import com.deadly.orderapp.models.response.generic.ChangedResponse;
+import com.deadly.orderapp.models.response.generic.VersionResponse;
+import com.deadly.orderapp.models.response.product.ProductListResponse;
+import com.deadly.orderapp.models.response.product.ProductResponse;
+import com.deadly.orderapp.models.response.user.UserListResponse;
+import com.deadly.orderapp.models.response.user.UserResponse;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -82,41 +92,93 @@ public class Client {
         body.put("username", username);
         body.put("password", password);
 
-        try {
-            AuthenticationResponse response = _CLIENT.postLogin(body).execute().body();
+        executor.execute(() -> {
+            try {
+                AuthenticationResponse response = _CLIENT.postLogin(body).execute().body();
 
-            if (response == null) {
-                _LOGGED_IN = false;
-                _TOKEN = null;
-                _UUID = null;
-                return;
+                if (response == null) {
+                    _LOGGED_IN = false;
+                    _TOKEN = null;
+                    _UUID = null;
+                    return;
+                }
+
+                _LOGGED_IN = true;
+                _TOKEN = response.login.token;
+                _LIFETIME = response.login.lifetime;
+                _UUID = response.login.uuid;
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-
-            _LOGGED_IN = true;
-            _TOKEN = response.login.token;
-            _LIFETIME = response.login.lifetime;
-            _UUID = response.login.uuid;
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        });
     }
 
-
-    public int getHealth() {
-        final int[] code = new int[1];
+    // Generics
+    public LiveData<BaseResponse> getHealth() {
+        MutableLiveData<BaseResponse> result = new MutableLiveData<>();
         executor.execute(() -> _CLIENT.getHealth().enqueue(new Callback<BaseResponse>() {
             @Override
             public void onResponse(Call<BaseResponse> call, Response<BaseResponse> response) {
-                code[0] = response.code();
+                result.setValue(response.body());
             }
 
             @Override
             public void onFailure(Call<BaseResponse> call, Throwable t) {
-                code[0] = -1;
+                result.setValue(null);
             }
         }));
-        return code[0];
+        return result;
+    }
+
+    public LiveData<VersionResponse> getVersion() {
+        MutableLiveData<VersionResponse> result = new MutableLiveData<>();
+        executor.execute(() -> _CLIENT.getVersion().enqueue(new Callback<VersionResponse>() {
+            @Override
+            public void onResponse(Call<VersionResponse> call, Response<VersionResponse> response) {
+                result.setValue(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<VersionResponse> call, Throwable t) {
+                result.setValue(null);
+            }
+        }));
+        return result;
+    }
+
+    public LiveData<ChangedResponse> getLastChanged() {
+        MutableLiveData<ChangedResponse> result = new MutableLiveData<>();
+        executor.execute(() -> _CLIENT.getLastChanged().enqueue(new Callback<ChangedResponse>() {
+            @Override
+            public void onResponse(Call<ChangedResponse> call, Response<ChangedResponse> response) {
+                result.setValue(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<ChangedResponse> call, Throwable t) {
+                result.setValue(null);
+            }
+        }));
+        return result;
+    }
+
+    // Authentication
+
+    public LiveData<VerifyResponse> getAuthTest() {
+        MutableLiveData<VerifyResponse> result = new MutableLiveData<>();
+        executor.execute(() -> _CLIENT.getAuthTest().enqueue(new Callback<VerifyResponse>() {
+            @Override
+            public void onResponse(Call<VerifyResponse> call, Response<VerifyResponse> response) {
+                result.setValue(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<VerifyResponse> call, Throwable t) {
+                result.setValue(null);
+            }
+        }));
+        return result;
     }
 
     public LiveData<VerifyResponse> getAuthAdminTest() {
@@ -134,4 +196,117 @@ public class Client {
         }));
         return result;
     }
+
+    // Users
+
+    public LiveData<UserListResponse> getAllUsers() {
+        MutableLiveData<UserListResponse> result = new MutableLiveData<>();
+        executor.execute(() -> _CLIENT.getAllUsers().enqueue(new Callback<UserListResponse>() {
+            @Override
+            public void onResponse(Call<UserListResponse> call, Response<UserListResponse> response) {
+                result.setValue(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<UserListResponse> call, Throwable t) {
+                result.setValue(null);
+            }
+        }));
+        return result;
+    }
+
+    public LiveData<UserResponse> getUserByUuid(String uuid) {
+        MutableLiveData<UserResponse> result = new MutableLiveData<>();
+        executor.execute(() -> _CLIENT.getUserByUuid(uuid).enqueue(new Callback<UserResponse>() {
+            @Override
+            public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
+                result.setValue(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<UserResponse> call, Throwable t) {
+                result.setValue(null);
+            }
+        }));
+        return result;
+    }
+
+    @Deprecated
+    public LiveData<?> getUsersLastChanged() {
+        throw new NoSuchPropertyException("Unimplemented");
+    }
+    
+    // Product
+
+    public LiveData<ProductListResponse> getAllProducts() {
+        MutableLiveData<ProductListResponse> result = new MutableLiveData<>();
+        executor.execute(() -> _CLIENT.getAllProducts().enqueue(new Callback<ProductListResponse>() {
+            @Override
+            public void onResponse(Call<ProductListResponse> call, Response<ProductListResponse> response) {
+                result.setValue(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<ProductListResponse> call, Throwable t) {
+                result.setValue(null);
+            }
+        }));
+        return result;
+    }
+
+    public LiveData<ProductResponse> getProductByUuid(String uuid) {
+        MutableLiveData<ProductResponse> result = new MutableLiveData<>();
+        executor.execute(() -> _CLIENT.getProductByUuid(uuid).enqueue(new Callback<ProductResponse>() {
+            @Override
+            public void onResponse(Call<ProductResponse> call, Response<ProductResponse> response) {
+                result.setValue(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<ProductResponse> call, Throwable t) {
+                result.setValue(null);
+            }
+        }));
+        return result;
+    }
+
+    @Deprecated
+    public LiveData<?> getEventsLastChanged() { throw new NoSuchPropertyException("Unimplemented"); }
+
+    // Events
+
+    public LiveData<EventListResponse> getAllEvents() {
+        MutableLiveData<EventListResponse> result = new MutableLiveData<>();
+        executor.execute(() -> _CLIENT.getAllEvents().enqueue(new Callback<EventListResponse>() {
+            @Override
+            public void onResponse(Call<EventListResponse> call, Response<EventListResponse> response) {
+                result.setValue(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<EventListResponse> call, Throwable t) {
+                result.setValue(null);
+            }
+        }));
+        return result;
+    }
+
+    public LiveData<EventResponse> getEventByUuid(String uuid) {
+        MutableLiveData<EventResponse> result = new MutableLiveData<>();
+        executor.execute(() -> _CLIENT.getEventByUuid(uuid).enqueue(new Callback<EventResponse>() {
+            @Override
+            public void onResponse(Call<EventResponse> call, Response<EventResponse> response) {
+                result.setValue(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<EventResponse> call, Throwable t) {
+                result.setValue(null);
+            }
+        }));
+        return result;
+    }
+
+    @Deprecated
+    public LiveData<?> getProductsLastChanged() { throw new NoSuchPropertyException("Unimplemented"); }
 }

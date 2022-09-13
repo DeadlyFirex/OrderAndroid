@@ -6,8 +6,10 @@ import com.deadly.orderapp.models.response.BaseResponse;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class EventResponse extends BaseResponse {
+import java.util.List;
+
+public class EventListResponse extends BaseResponse {
     @SerializedName("result")
     @Expose
-    public Event result;
+    public List<Event> result;
 }
