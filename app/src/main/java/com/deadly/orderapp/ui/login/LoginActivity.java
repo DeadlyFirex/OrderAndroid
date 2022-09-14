@@ -1,22 +1,9 @@
 package com.deadly.orderapp.ui.login;
 
 import android.app.Activity;
-
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-
-import android.content.Context;
-import android.content.Intent;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
-
-import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.os.StrictMode;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
@@ -28,16 +15,18 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.deadly.orderapp.R;
+import com.deadly.orderapp.databinding.ActivityLoginBinding;
 import com.deadly.orderapp.models.response.auth.VerifyResponse;
 import com.deadly.orderapp.services.Client;
-import com.deadly.orderapp.ui.login.LoginViewModel;
-import com.deadly.orderapp.ui.login.LoginViewModelFactory;
-import com.deadly.orderapp.databinding.ActivityLoginBinding;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -63,7 +52,6 @@ public class LoginActivity extends AppCompatActivity {
         final EditText passwordEditText = binding.password;
         final Button loginButton = binding.login;
         final Button activeButton = binding.activateButton;
-        final TextView tempTextView = binding.tempTextView;
         final ProgressBar loadingProgressBar = binding.loading;
 
         loginViewModel.getLoginFormState().observe(this, new Observer<LoginFormState>() {
@@ -145,15 +133,26 @@ public class LoginActivity extends AppCompatActivity {
         activeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-                // StrictMode.setThreadPolicy(policy);
-
                 try {
-                    Client client = new Client("http://10.135.139.147:5000",
+                    Client client = new Client("http://10.8.0.1:5000",
                             usernameEditText.getText().toString(), passwordEditText.getText().toString(), executorService);
 
-                    LiveData<VerifyResponse> result = client.getAuthAdminTest();
-                    result.observe(LoginActivity.this, verifyResponse -> System.out.println(verifyResponse.message));
+                    LiveData<VerifyResponse> result = client.getAuthTest();
+                    result.observe(LoginActivity.this, verifyResponse -> {
+                        new AlertDialog.Builder(LoginActivity.this)
+                                .setTitle(null)
+                                .setMessage(verifyResponse.status + " : " + verifyResponse.message + "as: " + verifyResponse.login.uuid)
+
+                                // Specifying a listener allows you to take an action before dismissing the dialog.
+                                // The dialog is automatically dismissed when a dialog button is clicked.
+                                .setPositiveButton(android.R.string.yes, null)
+
+                                // A null listener allows the button to dismiss the dialog and take no further action.
+                                .setNegativeButton(android.R.string.no, null)
+                                .setIcon(android.R.drawable.ic_dialog_alert)
+                                .show();
+
+                    });
                 } catch (LoginException e) {
                     throw new RuntimeException(e);
                 }
