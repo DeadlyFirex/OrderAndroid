@@ -18,11 +18,10 @@ import com.deadly.orderapp.models.response.user.UserListResponse;
 import com.deadly.orderapp.models.response.user.UserResponse;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.Executor;
-
-import javax.security.auth.login.LoginException;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -60,7 +59,7 @@ public class Client {
                 .create(ClientInterface.class);
     }
 
-    public Client(String BASE_URL, String username, String password, Executor executor) throws RuntimeException, LoginException {
+    public Client(String BASE_URL, String username, String password, Executor executor) {
         this.BASE_URL = BASE_URL;
         this.executor = executor;
 
@@ -108,8 +107,12 @@ public class Client {
                 _LIFETIME = response.login.lifetime;
                 _UUID = response.login.uuid;
 
+            } catch (ConnectException e) {
+                _LOGGED_IN = false;
+                _TOKEN = null;
+                _UUID = null;
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("Unable to process request: " + e.getMessage());
             }
         });
     }
